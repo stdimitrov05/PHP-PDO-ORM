@@ -3,7 +3,8 @@
     "type": "libary",
     "autoload": {
         "psr-4": {
-            "Stdimitrov\\Orm\\": "src/"
+            "Stdimitrov\\Orm\\": "src/",
+            "App\\Models\\": "models/"
         }
     },
     "authors": [

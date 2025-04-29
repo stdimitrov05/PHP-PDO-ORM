@@ -8,7 +8,7 @@ use PDOStatement;
 use ReflectionClass;
 use Stdimitrov\Orm\Tools\Helper;
 
-class Database implements Interfaces\Database
+class Database
 {
     private bool $forceReadWrite = false;
     private bool $debug = false;
@@ -64,7 +64,7 @@ class Database implements Interfaces\Database
      *
      * @return PDO|null The read-only PDO connection or null if not available.
      */
-    public final function getReadConnection(): ?PDO
+    protected final function getReadConnection(): ?PDO
     {
         return $this->pdoRO ?: $this->createInstance(true);
     }
@@ -74,7 +74,7 @@ class Database implements Interfaces\Database
      *
      * @return PDO|null The read-write PDO connection or null if not available.
      */
-    public final function getWriteConnection(): ?PDO
+    protected final function getWriteConnection(): ?PDO
     {
         return $this->pdoRW ?: $this->createInstance();
     }
@@ -84,7 +84,7 @@ class Database implements Interfaces\Database
      *
      * @return $this
      */
-    public final function debug(): Database
+    protected final function debug(): Database
     {
         $this->debug = true;
 
@@ -94,9 +94,9 @@ class Database implements Interfaces\Database
     /**
      * Forces the use of the read-write database connection.
      *
-     * @return Interfaces\Database The current database instance.
+     * @return Database The current database instance.
      */
-    protected final function forceRW(): Interfaces\Database
+    protected final function forceRW(): Database
     {
         $this->forceReadWrite = true;
         return $this;
@@ -126,7 +126,7 @@ class Database implements Interfaces\Database
      * @return object|null The fetched record as an object, or null if no record is found.
      * @throws Exception If the SQL statement preparation or execution fails.
      */
-    public final function fetchOne(string $sql, ?array $params = null): ?object
+    protected final function fetchOne(string $sql, ?array $params = null): ?object
     {
         return $this->fetchResult($this->preparePDOStatement($sql, $params)->fetch(), 'fetchOne');
     }
@@ -139,7 +139,7 @@ class Database implements Interfaces\Database
      * @return array The fetched records as an array of objects.
      * @throws Exception If the SQL statement preparation or execution fails.
      */
-    public final function fetchAll(string $sql, ?array $params = null, ?int $fetchMode = PDO::FETCH_ASSOC): array
+    protected final function fetchAll(string $sql, ?array $params = null, ?int $fetchMode = PDO::FETCH_ASSOC): array
     {
         return $this->fetchResult($this->preparePDOStatement($sql, $params)->fetchAll(), 'fetchAll', $fetchMode) ?: [];
     }
@@ -152,7 +152,7 @@ class Database implements Interfaces\Database
      * @return mixed The result of the executed query.
      * @throws Exception
      */
-    public final function execute (string $sql, ?array $params = null): bool
+    protected final function execute(string $sql, ?array $params = null): bool
     {
         return $this->preparePDOStatement($sql, $params)->execute();
     }
@@ -251,7 +251,7 @@ class Database implements Interfaces\Database
      * @param mixed $result
      * @param string $method
      * @param int|null $fetchMode
-     * @return Interfaces\Database The current database instance.
+     * @return Database The current database instance.
      * @throws Exception
      */
     private function fetchResult(mixed $result, string $method, ?int $fetchMode = PDO::FETCH_ASSOC): mixed

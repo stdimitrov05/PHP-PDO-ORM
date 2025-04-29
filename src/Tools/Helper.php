@@ -12,7 +12,7 @@ readonly class Helper
      * @param string $string The input string to convert.
      * @return string The converted camelCase string.
      */
-    protected static function toCamelCase(string $string): string
+    public static function toCamelCase(string $string): string
     {
         return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $string))));
     }
@@ -106,7 +106,13 @@ readonly class Helper
             ucwords(str_replace(['-', '_'], ' ', array_key_first($tables)))
         );
 
-        $baseEntityInstance = new $baseEntity();
+        $namespace = getenv('MODEL_NAMESPACE') . "\\". $baseEntity;
+
+        if (!class_exists($namespace)) {
+            throw new Exception("Class $namespace does not exist.");
+        }
+
+        $baseEntityInstance = new $namespace;
 
         foreach ($tables as $table => $columns) {
             $currentEntity = str_replace(
@@ -114,10 +120,10 @@ readonly class Helper
                 '',
                 ucwords(str_replace(['-', '_'], ' ', $table))
             );
+            $class =  getenv('MODEL_NAMESPACE') . "\\". $currentEntity;
 
-            $currentInstance = new $currentEntity();
-
-            $properties = (object)get_class_vars($currentEntity);
+            $currentInstance = new $class();
+            $properties = (object)get_class_vars($class);
 
             if ($currentEntity === $baseEntity) {
                 // Assign properties to instance
