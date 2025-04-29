@@ -12,6 +12,7 @@ Designed for developers who want simple, clean, and efficient access to their da
 ---
 ## Features
 
+- Automatic model generation from existing database tables
 - Support InnoDB and MySQL Cluster
 - Simple and intuitive CRUD operations
 - Read/Write database connection support
