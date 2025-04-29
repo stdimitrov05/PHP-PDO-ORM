@@ -1,6 +1,6 @@
 <?php
 
-namespace StdimitrovOrm\Interfaces;
+namespace Stdimitrov\Orm\Interfaces;
 
 use Exception;
 use PDO;

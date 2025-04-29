@@ -1,12 +1,12 @@
 <?php
 
-namespace StdimitrovOrm;
+namespace Stdimitrov\Orm;
 
 use Exception;
 use PDO;
 use PDOStatement;
 use ReflectionClass;
-use StdimitrovOrm\Tools\Helper;
+use Stdimitrov\Orm\Tools\Helper;
 
 class Database implements Interfaces\Database
 {

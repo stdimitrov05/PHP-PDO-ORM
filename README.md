@@ -46,7 +46,7 @@ DB_PORT_RW=3306 # this is port for write connection
 
 ```php
 namespace App\Models;
-use StdimitrovOrm\Database;
+use Stdimitrov\Orm\Database;
 
 class Users extends Database
 {
@@ -69,7 +69,7 @@ class Users extends Database
 
 ```php
 namespace App\Repositories;
-use StdimitrovOrm\Database;
+use Stdimitrov\Orm\Database;
 use App\Models\Users;
 
 class UsersRepository extends Database
