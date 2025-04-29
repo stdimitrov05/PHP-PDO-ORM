@@ -36,6 +36,7 @@ DB_USER=your_database_user
 DB_PASS=your_database_password
 DB_PORT_RO=3306 # this is port for read connection
 DB_PORT_RW=3306 # this is port for write connection
+MODEL_NAMESPACE=App\Models
 ```
 
 ## Basic Usage
