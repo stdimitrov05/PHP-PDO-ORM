@@ -132,6 +132,19 @@ class Database
     }
 
     /**
+     * Fetches a single column from the database.
+     *
+     * @param string $sql The SQL query to execute.
+     * @param array|null $params The parameters to bind to the query.
+     * @return mixed The fetched column value.
+     * @throws Exception If the SQL statement preparation or execution fails.
+     */
+    protected final function fetchColumn(string $sql, ?array $params = null): mixed
+    {
+        return $this->preparePDOStatement($sql, $params)->fetchColumn();
+    }
+
+    /**
      * Fetches all records from the database.
      *
      * @param string $sql The SQL query to execute.

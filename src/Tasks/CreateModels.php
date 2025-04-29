@@ -69,9 +69,9 @@ class CreateModels extends Database
             
             namespace {$namespace};
             
-            use Stdimitrov\Orm\Database;
+            use Stdimitrov\Orm\AbstractDatabase;
             
-            class {$className} extends Database
+            class {$className} extends AbstractDatabase
             {
                 {$properties}
                 

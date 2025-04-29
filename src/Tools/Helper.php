@@ -170,4 +170,31 @@ readonly class Helper
 
         return $query;
     }
+
+    /**
+     * Calculates pagination data.
+     *
+     * @param int $totalItems The total number of items.
+     * @param int $currentPage The current page number.
+     * @param int $perPage The number of items per page.
+     *
+     * @return object An array containing pagination data.
+     */
+    public static function calculatePagination(int $totalItems, int $currentPage, int $perPage): object
+    {
+        $totalPages = ceil($totalItems / $perPage);
+        $currentPage = max(1, min($totalPages, $currentPage)); // Ensure current page is within the valid range
+
+        $nextPage = $currentPage < $totalPages ? 1 : 0;
+        $prevPage = $currentPage > 1 ? $currentPage - 1 : 0;
+
+        return (object)[
+            'totalItems' => $totalItems,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+            'page' => $currentPage,
+            'next' => $nextPage,
+            'prev' => $prevPage
+        ];
+    }
 }
