@@ -8,8 +8,6 @@ use Stdimitrov\Orm\Tools\Helper;
 
 class CreateModels extends Database
 {
-
-
     private array $tables = [];
 
     public function run(string $dir): void
