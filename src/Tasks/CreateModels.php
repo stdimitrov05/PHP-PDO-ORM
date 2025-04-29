@@ -12,14 +12,15 @@ class CreateModels extends Database
 
     private array $tables = [];
 
-    public function run(string $namespace, string $dir): void
+    public function run(string $dir): void
     {
-
         if (!is_dir($dir)) {
             mkdir($dir, 0777, true);
         }
 
-        // Count tables in the database
+        $namespace = getenv('MODEL_NAMESPACE');
+
+            // Count tables in the database
         $total = $this->countTables();
 
         echo "Found $total tables in the database.\n";
@@ -30,7 +31,6 @@ class CreateModels extends Database
             $tableColumns = $this->getWriteConnection()->query("SHOW COLUMNS FROM `$table`")->fetchAll();
 
             $tableColumns = array_map(function ($column) {
-
                 $type = trim(str_replace('unsigned', '', $column['Type']));
                 $type = match ($type) {
                     'int', 'tinyint', 'tinyint(1)', 'mediumint' => 'int',
@@ -42,12 +42,12 @@ class CreateModels extends Database
                 $isNullable = $column['Null'] === 'YES';
 
                 if ($isNullable) {
-                    $defaultValue =$column['Default'];
+                    $defaultValue = $column['Default'];
 
                     if ($defaultValue === 'NULL') {
                         $defaultValue = null;
                     } else {
-                        $defaultValue =  match ($type) {
+                        $defaultValue = match ($type) {
                             'int' => (int)$defaultValue,
                             'float' => (float)$defaultValue,
                             default => "''",
@@ -61,7 +61,7 @@ class CreateModels extends Database
                 return $prop;
             }, $tableColumns);
 
-            $className =  Helper::toPascalCase($table);
+            $className = Helper::toPascalCase($table);
             $properties = implode("\n    ", $tableColumns);
 
             $phpFile = <<<EOT
