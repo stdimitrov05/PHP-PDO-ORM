@@ -36,88 +36,31 @@ DB_USER=your_database_user
 DB_PASS=your_database_password
 DB_PORT_RO=3306 # this is port for read connection
 DB_PORT_RW=3306 # this is port for write connection
-MODEL_NAMESPACE=App\Models
+MODEL_NAMESPACE=App\Models # Namespace for your models
 ```
 
 ## Basic Usage
-
-
-### 1. Using the ORM on a Model
--- note: Class name should be same as table
-
-```php
-namespace App\Models;
-use Stdimitrov\Orm\Database;
-
-class Users extends Database
-{
-    public int $id; // Primary Key
-    public string $name;
-    public int $age;
-    //...
-    
-    // Define the specific table name
-    public function getTableName()
-    {
-        return 'users'; // Specify the table name
-    }
-}
-```
-
-
-### 2. Using the ORM on a Repository
--- note: Class name should be same as table + Repository
-
-```php
-namespace App\Repositories;
-use Stdimitrov\Orm\Database;
-use App\Models\Users;
-
-class UsersRepository extends Database
-{
-    public function findById(int $id): ?Users 
-    {
-        $sql = 'SELECT * FROM users WHERE id = ?';
-        $params = [$id];
-    
-        return $this->fetchOne($sql, $params);
-    }
-
-    /**
-    * @return Users[] | null
-    */
-    public function getAllUsers(): ?array
-    {
-        $sql = 'SELECT * FROM users LIMIT 10';
-    
-        return $this->fetchAll($sql);
-    }
-    
-    // IF use readonly connection but need to write
-    public function findById(int $id): ?Users 
-    {
-        $sql = 'SELECT * FROM users WHERE id = ?';
-        $params = [$id];
-    
-        return $this->forceRW()->fetchOne($sql, $params);
-    }
-    
-    
-    // IF you need debug current query before execute
-    public function findById(int $id): ?Users 
-    {
-        $sql = 'SELECT * FROM users WHERE id = ?';
-        $params = [$id];
-    
-        return $this->debug()->fetchOne($sql, $params);
-    }
-}
-
-```
 ---
 
-## Contributing
+1. Create task for creating models:
 
+```php
+$dir = __DIR__ . '/models'; // Directory where the models will be created
+new \Stdimitrov\Orm\Tasks\CreateModels()->run($dir);
+```
+
+2. Create a repository extending current model:
+
+```php
+class UsersRepository extends \App\Models\Users
+{
+    // Add custom methods here 
+}
+```
+
+
+## Contributing
+---
 Contributions are welcome!  
 Please fork the repository, create a feature branch, and submit a pull request.  
 Follow PSR-12 coding standards and include relevant tests.
