@@ -1,14 +1,14 @@
 {
-    "name": "stan/orm",
+    "name": "stdimitrov/orm",
     "type": "libary",
     "autoload": {
         "psr-4": {
-            "Stan\\Orm\\": "src/"
+            "Stdimitrov\\Orm\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "stan",
+            "name": "stdimitrov",
             "email": "stdimitrov05@gmail.com"
         }
     ],

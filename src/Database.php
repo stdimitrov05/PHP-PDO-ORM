@@ -1,12 +1,12 @@
 <?php
 
-namespace Stan\Orm;
+namespace StdimitrovOrm;
 
 use Exception;
 use PDO;
 use PDOStatement;
 use ReflectionClass;
-use Stan\Orm\Tools\Helper;
+use StdimitrovOrm\Tools\Helper;
 
 class Database implements Interfaces\Database
 {

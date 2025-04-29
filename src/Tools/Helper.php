@@ -1,6 +1,6 @@
 <?php
 
-namespace Stan\Orm\Tools;
+namespace StdimitrovOrm\Tools;
 
 use Exception;
 
