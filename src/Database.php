@@ -212,7 +212,10 @@ class Database
 
         $sql .= " WHERE " . Helper::toSnakeCase($primaryKey) . " = ?";
 
-        $this->preparePDOStatement($sql, [$id]);
+        $this->preparePDOStatement($sql, [
+            ...$params,
+            $id,
+        ]);
     }
 
     /**
