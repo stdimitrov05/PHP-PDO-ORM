@@ -205,17 +205,17 @@ class Database
         $sql = "UPDATE $table SET ";
 
         foreach ($params as $key => $value) {
-            $sql .= Helper::addBackticks($key) . ' = ?, ';
+            $sql .= Helper::addBackticks(Helper::toSnakeCase($key)) . ' = ?, ';
         }
 
         $sql = rtrim($sql, ', ');
 
         $sql .= " WHERE " . Helper::toSnakeCase($primaryKey) . " = ?";
 
-        $this->preparePDOStatement($sql, [
-            ...$params,
-            $id,
-        ]);
+        $params = array_values($params);
+        $params[] = $id;
+
+        $this->preparePDOStatement($sql, $params);
     }
 
     /**
