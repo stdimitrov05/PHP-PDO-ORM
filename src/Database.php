@@ -4,9 +4,13 @@ namespace Stdimitrov\Orm;
 
 use Exception;
 use PDO;
+use PDOException;
 use PDOStatement;
 use ReflectionClass;
+use Stdimitrov\Orm\Exceptions\DatabaseException;
+use Stdimitrov\Orm\Exceptions\ExceptionCodes;
 use Stdimitrov\Orm\Tools\Helper;
+use Throwable;
 
 class Database
 {
@@ -25,7 +29,10 @@ class Database
                 $this->sql = $value;
                 // Check if the SQL statement is a valid SQL statement
                 if (!preg_match('/^(SELECT|INSERT|UPDATE|DELETE|CREATE|TRUNCATE)\s/i', trim($this->sql))) {
-                    throw new Exception("Invalid SQL statement.");
+                    $this->throwError(
+                        "Invalid SQL statement.",
+                        ExceptionCodes::INVALID_QUERY,
+                    );
                 }
 
                 // Create a new PDO instance if the SQL statement is not empty
@@ -43,13 +50,19 @@ class Database
                 // Check if the number of parameters matches the number of placeholders in the SQL statement
                 $placeholderCount = substr_count($this->sql, '?');
                 if (count($this->params) !== $placeholderCount) {
-                    throw new Exception("Number of parameters does not match number of placeholders in SQL statement.");
+                    $this->throwError(
+                        'Number of parameters does not match number of placeholders in SQL statement.',
+                        ExceptionCodes::INVALID_QUERY
+                    );
                 }
 
                 // Check if the parameters are valid
                 foreach ($this->params as $param) {
                     if (!is_scalar($param) && !is_null($param)) {
-                        throw new Exception("Invalid parameter type.");
+                        $this->throwError(
+                            'Invalid parameter type.',
+                            ExceptionCodes::INVALID_PARAMS
+                        );
                     }
                 }
             } else {
@@ -242,21 +255,32 @@ class Database
      */
     private function preparePDOStatement(string $sql, ?array $params = []): PDOStatement
     {
-        $this->sql = $sql;
-        $this->params = $params;
+        try {
+            $this->sql = $sql;
+            $this->params = $params;
 
-        if ($this->debug) {
-            echo Helper::debugQuery($this->sql, $this->params);
-            exit;
+            if ($this->debug) {
+                echo Helper::debugQuery($this->sql, $this->params);
+                exit;
+            }
+
+            $statement = $this->currentInstance->prepare($this->sql);
+
+            if ($statement === false) {
+                $this->throwError(
+                    'Failed to prepare SQL statement.',
+                    ExceptionCodes::PDO_EXCEPTION
+                );
+            }
+
+            $statement->execute($this->params);
+        } catch (PDOException $e) {
+            $this->throwError(
+                'PDO Exception: ' . $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
-
-        $statement = $this->currentInstance->prepare($this->sql);
-
-        if ($statement === false) {
-            throw new Exception("Failed to prepare SQL statement.");
-        }
-
-        $statement->execute($this->params);
 
         return $statement;
     }
@@ -326,41 +350,56 @@ class Database
      */
     private function createInstance(bool $isRO = false): PDO
     {
-        $user = getenv("DB_USER");
-        $pass = getenv("DB_PASS");
-        $host = getenv("DB_HOST");
-        $db = getenv("DB_NAME");
-        $port = getenv("DB_PORT_RW");
+        try {
+            $user = getenv("DB_USER");
+            $pass = getenv("DB_PASS");
+            $host = getenv("DB_HOST");
+            $db = getenv("DB_NAME");
+            $port = getenv("DB_PORT_RW");
 
-        $charset = 'utf8mb4';
-        $options = [
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => true,
-            PDO::ATTR_STRINGIFY_FETCHES => false,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        ];
+            $charset = 'utf8mb4';
+            $options = [
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ];
 
-        $dsn = "mysql:host=$host;dbname=$db;charset=$charset;";
+            $dsn = "mysql:host=$host;dbname=$db;charset=$charset;";
 
-        if ($isRO || str_starts_with($this->sql, "SELECT") && !$this->forceReadWrite) {
-            if ($this->pdoRO === null) {
-                $dsn .= "port=" . getenv("DB_PORT_RO");
-                $this->pdoRO = new PDO($dsn, $user, $pass, $options);
+            if ($isRO || str_starts_with($this->sql, "SELECT") && !$this->forceReadWrite) {
+                if ($this->pdoRO === null) {
+                    $dsn .= "port=" . getenv("DB_PORT_RO");
+                    $this->pdoRO = new PDO($dsn, $user, $pass, $options);
+                }
+
+                $this->currentInstance = $this->pdoRO;
+
+                return $this->pdoRO;
+            } else {
+                if ($this->pdoRW === null) {
+                    $dsn .= "port=" . $port;
+
+                    $this->pdoRW = new PDO($dsn, $user, $pass, $options);
+                }
+                $this->currentInstance = $this->pdoRW;
+
+                return $this->pdoRW;
             }
-
-            $this->currentInstance = $this->pdoRO;
-
-            return $this->pdoRO;
-        } else {
-            if ($this->pdoRW === null) {
-                $dsn .= "port=" . $port;
-
-                $this->pdoRW = new PDO($dsn, $user, $pass, $options);
-            }
-            $this->currentInstance = $this->pdoRW;
-
-            return $this->pdoRW;
+        } catch (PDOException $e) {
+            $this->throwError(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
+    }
+
+    private function throwError(string $message, int $code, ?Throwable $throwable = null): void
+    {
+        throw new DatabaseException($message, $code, $throwable)
+            ->setQuery(Helper::debugQuery($this->sql, $this->params))
+            ->setParams($this->params);
     }
 
 
